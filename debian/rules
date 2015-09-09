@@ -24,11 +24,7 @@ include /usr/share/dpkg/default.mk
 # debmake generated override targets
 # This is example for Cmake (See http://bugs.debian.org/641051 )
 override_dh_auto_configure:
-	dh_auto_configure -- \
-	-DUSE_WXWIDGETS=OFF
+	dh_auto_configure -- -DUSE_WXWIDGETS=OFF
 
-override_dh_auto_install: 
-	mkdir -p $(CURDIR)/debian/shotdetect-cmd/usr/bin/
-	install -m 755 $(CURDIR)/build/shotdetect-cmd $(CURDIR)/debian/shotdetect-cmd/usr/bin/
 
 
