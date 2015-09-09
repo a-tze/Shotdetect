@@ -21,6 +21,12 @@ extern "C" {
 #include <libavformat/avformat.h>
 }
 
+/* Build fix for very old FFmpeg libraries */
+#ifndef AVPixelFormat
+#define AVPixelFormat PixelFormat
+#endif
+
+
 #ifdef BDD
 #include <postgresql/libpq-fe.h>
 #endif
