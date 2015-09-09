@@ -80,7 +80,7 @@ void film::create_main_dir() {
   }
 }
 
-void film::get_yuv_colors(AVFrame &pFrame) {
+void film::get_yuv_colors(AVFrame &pFrameYUV) {
   int x;
   int y;
   int c1, c2, c3;
@@ -92,9 +92,9 @@ void film::get_yuv_colors(AVFrame &pFrame) {
 
   for (y = 0; y < height; y++) {
     for (x = 0; x < width; x++) {
-      c1 = pFrame.data[0][pFrame.linesize[0] * y + x];  // Y
-      c2 = pFrame.data[1][pFrame.linesize[0] * y + x];  // Cb
-      c3 = pFrame.data[2][pFrame.linesize[0] * y + x];  // Cr
+      c1 = pFrameYUV.data[0][pFrameYUV.linesize[0] * y + x];  // Y
+      c2 = pFrameYUV.data[1][pFrameYUV.linesize[0] * y + x];  // Cb
+      c3 = pFrameYUV.data[2][pFrameYUV.linesize[0] * y + x];  // Cr
 
       c1tot += int(c1);
       c2tot += int(c2);
@@ -111,7 +111,7 @@ void film::get_yuv_colors(AVFrame &pFrame) {
  * If a shot is detected, this function also creates the image files
  * for this scene cut.
  */
-void film::CompareFrame(AVFrame *pFrame, AVFrame *pFramePrev) {
+void film::CompareFrameRGB(AVFrame *pFrame, AVFrame *pFramePrev) {
   int x;
   int y;
   int diff;
@@ -202,7 +202,7 @@ void film::CompareFrame(AVFrame *pFrame, AVFrame *pFramePrev) {
     {
       image *im_begin = new image(this, width, height, s.myid, BEGIN,
                                   this->thumb_set, this->shot_set);
-      im_begin->SaveFrame(pFrame, frame_number);
+      im_begin->SaveFrame(pFrame, frame_number, PIX_FMT_RGB24);
       s.img_begin = im_begin;
     }
 
@@ -214,7 +214,234 @@ void film::CompareFrame(AVFrame *pFrame, AVFrame *pFramePrev) {
     {
       image *im_end = new image(this, width, height, s.myid - 1, END,
                                 this->thumb_set, this->shot_set);
-      im_end->SaveFrame(pFramePrev, frame_number);
+      im_end->SaveFrame(pFramePrev, frame_number, PIX_FMT_RGB24);
+      shots.back().img_end = im_end;
+    }
+    shots.push_back(s);
+
+/*
+ * updating display
+ */
+#ifdef WXWIDGETS
+    wxString nbshots;
+    nbshots << shots.size();
+    if (display) {
+      wxMutexGuiEnter();
+      dialogParent->list_films->SetItem(0, 1, nbshots);
+      wxMutexGuiLeave();
+    }
+#endif
+  }
+}
+
+/*
+ * This function gathers the YUV values per frame and evaluates the
+ * possibility if this frame is a detected shot.
+ * If a shot is detected, this function also creates the image files
+ * for this scene cut.
+ */
+void film::CompareFrameYUV(AVFrame &pFrameYUV, AVFrame &pFrameYUVPrev) {
+  int x;
+  int y;
+  int diff;
+  int frame_number = pCodecCtx->frame_number;
+  int c1, c2, c3;
+  int c1tot, c2tot, c3tot;
+  c1tot = 0;
+  c2tot = 0;
+  c3tot = 0;
+  int c1prev, c2prev, c3prev;
+  int score = 0;
+  int drastic_score = 0;
+
+  // IDEA! Split image in slices and calculate score per-slice.
+  // This would allow to detect areas on the image which have stayed
+  // the same, and (a) increase score if all areas have changed
+  // and (b) decrease score if some areas have changed less (ot not at all).
+  for (y = 0; y < height; y++) {
+    for (x = 0; x < width; x++) {
+      c1 = pFrameYUV.data[0][pFrameYUV.linesize[0] * y + x];  // Y
+      c2 = pFrameYUV.data[1][pFrameYUV.linesize[0] * y + x];  // Cb
+      c3 = pFrameYUV.data[2][pFrameYUV.linesize[0] * y + x];  // Cr
+
+      c1prev = pFrameYUVPrev.data[0][pFrameYUVPrev.linesize[0] * y + x];  // Y
+      c2prev = pFrameYUVPrev.data[1][pFrameYUVPrev.linesize[0] * y + x];  // Cb
+      c3prev = pFrameYUVPrev.data[2][pFrameYUVPrev.linesize[0] * y + x];  // Cr
+
+      c1tot += int((char)c1);
+      c2tot += int((char)c2);
+      c3tot += int((char)c3);
+
+      drastic_score += abs(c1 - c1prev) >> 4;
+    }
+  }
+  int nbpx = (height * width);
+
+  /*
+   * On se ramene à la moyenne
+   */
+  score = drastic_score / (nbpx / 1000); // score == promille of pixels that changed more than 6% in Y channel
+  c1tot /= nbpx;
+  c2tot /= nbpx;
+  c3tot /= nbpx;
+
+  /*
+   * Calculate numerical difference between this and the previous frame
+   */
+  diff = abs(score - prev_score);
+  prev_score = score;
+
+  /*
+   * Store gathered data
+   */
+  g->push_data(score);
+  g->push_yuv(c1tot, c2tot, c3tot);
+
+  /*
+   * Take care of storing frame position and images of detecte scene cut
+   */
+  if ((diff > this->threshold) && (score > this->threshold)) {
+    shot s;
+    s.fbegin = frame_number;
+    s.msbegin = int((frame_number * 1000) / fps);
+    s.myid = shots.back().myid + 1;
+
+#ifdef DEBUG
+    cerr << "Shot log :: " << s.msbegin << " with score :: " << score << endl;
+#endif
+
+    /*
+     * Convert to ms
+     */
+    shots.back().fduration = frame_number - shots.back().fbegin;
+    shots.back().msduration = int(((shots.back().fduration) * 1000) / fps);
+
+/*
+ * Create images if necessary
+ */
+#ifdef WXWIDGETS
+    if (this->first_img_set ||
+        (display && dialogParent->checkbox_1->GetValue()))
+#else
+    if (this->first_img_set)
+#endif
+    {
+      image *im_begin = new image(this, width, height, s.myid, BEGIN,
+                                  this->thumb_set, this->shot_set);
+      im_begin->SaveFrame(&pFrameYUV, frame_number, PIX_FMT_YUV444P);
+      s.img_begin = im_begin;
+    }
+
+#ifdef WXWIDGETS
+    if (this->last_img_set || (display && dialogParent->checkbox_2->GetValue()))
+#else
+    if (this->last_img_set)
+#endif
+    {
+      image *im_end = new image(this, width, height, s.myid - 1, END,
+                                this->thumb_set, this->shot_set);
+      im_end->SaveFrame(&pFrameYUVPrev, frame_number, PIX_FMT_YUV444P);
+      shots.back().img_end = im_end;
+    }
+    shots.push_back(s);
+
+/*
+ * updating display
+ */
+#ifdef WXWIDGETS
+    wxString nbshots;
+    nbshots << shots.size();
+    if (display) {
+      wxMutexGuiEnter();
+      dialogParent->list_films->SetItem(0, 1, nbshots);
+      wxMutexGuiLeave();
+    }
+#endif
+  }
+}
+
+void film::CompareFrameY(AVFrame &pFrameY, AVFrame &pFrameYPrev) {
+  int x;
+  int y;
+  int diff;
+  int frame_number = pCodecCtx->frame_number;
+  int c1;
+  int c1tot = 0;
+  c1tot = 0;
+  int c1prev;
+  int score = 0;
+  int drastic_score = 0;
+
+  for (y = 0; y < height; y++) {
+    for (x = 0; x < width; x++) {
+      c1 = pFrameY.data[0][pFrameY.linesize[0] * y + x];  // Y
+      c1prev = pFrameYPrev.data[0][pFrameYPrev.linesize[0] * y + x];  // Y
+      c1tot += int((char)c1);
+      score += abs(c1 - c1prev);
+      drastic_score += abs(c1 - c1prev) >> 4;
+    }
+  }
+  int nbpx = (height * width);
+  score = drastic_score / (nbpx / 1000); // score == promille of pixels that changed more than 6% in Y channel
+  c1tot /= nbpx;
+
+  /*
+   * Calculate numerical difference between this and the previous frame
+   */
+  diff = abs(score - prev_score);
+  prev_score = score;
+  // TODO also compare against values of last detected shot change
+
+  /*
+   * Store gathered data
+   */
+  g->push_data(score);
+  g->push_yuv(c1tot, 0, 0);
+
+  /*
+   * Take care of storing frame position and images of detecte scene cut
+   */
+  if ((diff > this->threshold) && (score > this->threshold)) {
+    shot s;
+    s.fbegin = frame_number;
+    s.msbegin = int((frame_number * 1000) / fps);
+    s.myid = shots.back().myid + 1;
+
+#ifdef DEBUG
+    cerr << "Shot log :: " << s.msbegin << " with score :: " << score << endl;
+#endif
+
+    /*
+     * Convert to ms
+     */
+    shots.back().fduration = frame_number - shots.back().fbegin;
+    shots.back().msduration = int(((shots.back().fduration) * 1000) / fps);
+
+/*
+ * Create images if necessary
+ */
+#ifdef WXWIDGETS
+    if (this->first_img_set ||
+        (display && dialogParent->checkbox_1->GetValue()))
+#else
+    if (this->first_img_set)
+#endif
+    {
+      image *im_begin = new image(this, width, height, s.myid, BEGIN,
+                                  this->thumb_set, this->shot_set);
+      im_begin->SaveFrame(&pFrameY, frame_number, PIX_FMT_GRAY8);
+      s.img_begin = im_begin;
+    }
+
+#ifdef WXWIDGETS
+    if (this->last_img_set || (display && dialogParent->checkbox_2->GetValue()))
+#else
+    if (this->last_img_set)
+#endif
+    {
+      image *im_end = new image(this, width, height, s.myid - 1, END,
+                                this->thumb_set, this->shot_set);
+      im_end->SaveFrame(&pFrameYPrev, frame_number, PIX_FMT_GRAY8);
       shots.back().img_end = im_end;
     }
     shots.push_back(s);
@@ -295,6 +522,7 @@ int film::process() {
   shot s;
   static struct SwsContext *img_convert_ctx = NULL;
   static struct SwsContext *img_ctx = NULL;
+  static struct SwsContext *img_gray_ctx = NULL;
   int frame_number;
 
   create_main_dir();
@@ -380,6 +608,10 @@ int film::process() {
     pFrameRGBprev = avcodec_alloc_frame();  // previous frame
     // YUV:
     pFrameYUV = avcodec_alloc_frame();  // current frame
+    pFrameYUVprev = avcodec_alloc_frame();  // previous frame
+    // Y:
+    pFrameY = avcodec_alloc_frame();  // current frame
+    pFrameYprev = avcodec_alloc_frame();  // previous frame
 
     /*
      * Allocate memory for the pixels of a picture and setup the AVPicture
@@ -390,6 +622,10 @@ int film::process() {
     avpicture_alloc((AVPicture *)pFrameRGBprev, PIX_FMT_RGB24, width, height);
     // YUV:
     avpicture_alloc((AVPicture *)pFrameYUV, PIX_FMT_YUV444P, width, height);
+    avpicture_alloc((AVPicture *)pFrameYUVprev, PIX_FMT_YUV444P, width, height);
+    // Y:
+    avpicture_alloc((AVPicture *)pFrameY, PIX_FMT_GRAY8, width, height);
+    avpicture_alloc((AVPicture *)pFrameYprev, PIX_FMT_GRAY8, width, height);
 
     /*
      * Mise en place du premier plan
@@ -435,6 +671,17 @@ int film::process() {
             exit(1);
           }
         }
+        // Convert the image into GRAY8
+        if (!img_gray_ctx) {
+          img_gray_ctx =
+              sws_getContext(width, height, pCodecCtx->pix_fmt, width, height,
+                             PIX_FMT_GRAY8, SWS_BICUBIC, NULL, NULL, NULL);
+          if (!img_gray_ctx) {
+            fprintf(stderr,
+                    "Cannot initialize the converted Y image context!\n");
+            exit(1);
+          }
+        }
 
         // Convert the image into RGB24
         if (!img_convert_ctx) {
@@ -464,12 +711,18 @@ int film::process() {
         sws_scale(img_ctx, pFrame->data, pFrame->linesize, 0, pCodecCtx->height,
                   pFrameYUV->data, pFrameYUV->linesize);
 
+        sws_scale(img_gray_ctx, pFrame->data, pFrame->linesize, 0, pCodecCtx->height,
+                  pFrameY->data, pFrameY->linesize);
+
         /* Extract pixel color information  */
         get_yuv_colors(*pFrameYUV);
 
         /* If it's not the first image */
         if (frame_number != 1) {
-          CompareFrame(pFrameRGB, pFrameRGBprev);
+// TODO: unite the 3 functions, introduce options to choose comparison method
+//        CompareFrameRGB(pFrameRGB, pFrameRGBprev);
+//        CompareFrameYUV(*pFrameYUV, *pFrameYUVprev);
+          CompareFrameY(*pFrameY, *pFrameYprev);
         } else {
           /*
            * Cas ou c'est la premiere image, on cree la premiere image dans tous
@@ -491,6 +744,10 @@ int film::process() {
           }
         }
         /* Copy current frame as "previous" for next round */
+        av_picture_copy((AVPicture *)pFrameYUVprev, (AVPicture *)pFrameYUV,
+                        PIX_FMT_YUV444P, width, height);
+        av_picture_copy((AVPicture *)pFrameYprev, (AVPicture *)pFrameY,
+                        PIX_FMT_GRAY8, width, height);
         av_picture_copy((AVPicture *)pFrameRGBprev, (AVPicture *)pFrameRGB,
                         PIX_FMT_RGB24, width, height);
 
@@ -543,6 +800,7 @@ int film::process() {
     av_free(pFrameRGB);
     av_free(pFrameRGBprev);
     av_free(pFrameYUV);
+    av_free(pFrameYUVprev);
     avcodec_close(pCodecCtx);
   }
 

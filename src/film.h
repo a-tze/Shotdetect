@@ -85,6 +85,10 @@ class film {
   AVFrame *pFrameRGBprev;
   // - YUV:
   AVFrame *pFrameYUV;
+  AVFrame *pFrameYUVprev;
+  // - gray:
+  AVFrame *pFrameY;
+  AVFrame *pFrameYprev;
 
   AVPacket packet;
 
@@ -111,7 +115,10 @@ class film {
 
   void do_stats(int frame);
   void get_yuv_colors(AVFrame &pFrame);
-  void CompareFrame(AVFrame *pFrame, AVFrame *pFramePrev);
+  void CompareFrameRGB(AVFrame *pFrameRGB, AVFrame *pFrameRGBPrev);
+  void CompareFrameYUV(AVFrame &pFrameYUV, AVFrame &pFrameYUVPrev);
+  void CompareFrameY(AVFrame &pFrameY, AVFrame &pFrameYPrev);
+
   graph *g;
 
   void update_metadata();
