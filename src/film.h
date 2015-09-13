@@ -10,7 +10,7 @@
 #define UINT64_C(c) (c##ULL)
 #endif
 
-#define THUMB_HEIGHT 84
+#define THUMB_HEIGHT 150
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
