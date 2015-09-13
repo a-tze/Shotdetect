@@ -50,6 +50,7 @@ void show_help(char **argv) {
       "-h           : show this help\n"
       "-n           : commandline mode (disable GUI)\n"
       "-s threshold : threshold (Default=%d)\n"
+      "-5           : inspect only every 5th frame\n"
       "-i file      : input file path\n"
       "-o path      : output path\n"
       "-y year      : set the year\n"
