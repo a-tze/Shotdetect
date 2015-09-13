@@ -721,8 +721,8 @@ int film::process() {
         if (frame_number != 1) {
 // TODO: unite the 3 functions, introduce options to choose comparison method
 //        CompareFrameRGB(pFrameRGB, pFrameRGBprev);
-//        CompareFrameYUV(*pFrameYUV, *pFrameYUVprev);
-          CompareFrameY(*pFrameY, *pFrameYprev);
+          CompareFrameYUV(*pFrameYUV, *pFrameYUVprev);
+//        CompareFrameY(*pFrameY, *pFrameYprev);
         } else {
           /*
            * Cas ou c'est la premiere image, on cree la premiere image dans tous
@@ -785,7 +785,7 @@ int film::process() {
      */
     g->init_gd();
     g->draw_all_canvas();
-    g->draw_color_datas();
+//    g->draw_color_datas();
     g->draw_datas();
     if (video_set) {
       string xml_color = graphpath + "/" + alphaid + "_video.xml";

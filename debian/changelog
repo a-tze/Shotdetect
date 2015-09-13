@@ -1,3 +1,9 @@
+shotdetect (2015.09.13.01) unstable; urgency=low
+
+  * Do not draw histograms, segfaults due to missing RGB values
+
+ -- Matthias Hunstock <atze@fem.tu-ilmenau.de>  Sun, 13 Sep 2015 19:39:15 +0200
+
 shotdetect (2015.09.09.01) unstable; urgency=low
 
   * Initial release 
