@@ -451,7 +451,7 @@ void graph::write_xml(string filename) {
   // Write video measurement data for every second:
   for (int i = 0; int(double(i) * (f->fps)) < data.size() - 1; i++) {
     int index = int(double(i) * (f->fps));
-
+/*
     float r;
     float g;
     float b;
@@ -461,6 +461,8 @@ void graph::write_xml(string filename) {
     fprintf(fd_xml, "<v m=\"%d\" r=\"%d\" g=\"%d\" b=\"%d\" s=\"%d\" />\n",
             data[index].global, int(r * 255), int(g * 255), int(b * 255),
             int(colors_hsv[index].c2 * 100));
+*/
+    fprintf(fd_xml, "<v m=\"%d\" />\n", data[index].global);
   }
   fprintf(fd_xml, "</frame>\n</iri>");
   fclose(fd_xml);
