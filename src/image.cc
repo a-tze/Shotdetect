@@ -161,7 +161,7 @@ int image::SaveFrame(AVFrame *pFrame, int frame_number) {
     }
     gdImageCopyResized(miniim, im, 0, 0, 0, 0, width_s, height_s, width,
                        height);
-    gdImageJpeg(miniim, minijpgout, 90);
+    gdImageJpeg(miniim, minijpgout, 80);
     fclose(minijpgout);
   }
 
