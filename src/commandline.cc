@@ -86,7 +86,7 @@ int main(int argc, char **argv) {
   f.set_draw_yuv_graph(false);  // YUV graph is still disabled, until it works.
 
   for (;;) {
-    int c = getopt(argc, argv, "?ht:y:i:o:a:x:s:flwvmrc");
+    int c = getopt(argc, argv, "?ht:y:i:o:a:x:s:flwvmrc5");
 
     if (c < 0) {
       break;
@@ -175,6 +175,11 @@ int main(int argc, char **argv) {
         if (!f.get_opath().empty()) {
           ofile_set = true;
         }
+        break;
+
+      /* inspect every 5th frame only */
+      case '5':
+        f.set_fifth(true);
         break;
 
       default:

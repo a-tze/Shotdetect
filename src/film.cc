@@ -719,10 +719,14 @@ int film::process() {
 
         /* If it's not the first image */
         if (frame_number != 1) {
+          if (!this->fifth_set || (frame_number % 5) == 0) {
 // TODO: unite the 3 functions, introduce options to choose comparison method
-//        CompareFrameRGB(pFrameRGB, pFrameRGBprev);
-          CompareFrameYUV(*pFrameYUV, *pFrameYUVprev);
-//        CompareFrameY(*pFrameY, *pFrameYprev);
+//          CompareFrameRGB(pFrameRGB, pFrameRGBprev);
+            CompareFrameYUV(*pFrameYUV, *pFrameYUVprev);
+//          CompareFrameY(*pFrameY, *pFrameYprev);
+          } else {
+            continue;
+          }
         } else {
           /*
            * Cas ou c'est la premiere image, on cree la premiere image dans tous

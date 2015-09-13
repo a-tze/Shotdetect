@@ -134,6 +134,7 @@ class film {
  public:
   bool thumb_set;
   bool shot_set;
+  bool fifth_set;
 
   DialogShotDetect *dialogParent;
   struct {
@@ -225,6 +226,7 @@ class film {
   inline void set_video(bool val) { this->video_set = val; };
   inline void set_thumb(bool val) { this->thumb_set = val; };
   inline void set_shot(bool val) { this->shot_set = val; };
+  inline void set_fifth(bool val) { this->fifth_set = val; };
   inline void set_input_file(string input_file) {
     this->input_path = input_file;
   };
