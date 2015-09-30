@@ -3,8 +3,8 @@ Section: unknown
 Priority: optional
 Maintainer: atze <atze@fem.tu-ilmenau.de>
 Build-Depends: debhelper (>= 9), cmake, clang, dpkg-dev,
- libxml2-dev, libavutil-dev, libavformat-dev, libswscale-dev,
- libxslt1-dev, libgd-dev, libavcodec-dev, libavdevice-dev
+ libxml2-dev, libavutil-dev | libavutil-ffmpeg-dev, libavformat-dev | libavformat-ffmpeg-dev, libswscale-dev | libswscale-ffmpeg-dev,
+ libxslt1-dev, libgd-dev, libavcodec-dev | libavcodec-ffmpeg-dev, libavdevice-dev | libavdevice-ffmpeg-dev
 Standards-Version: 3.9.5
 
 Package: shotdetect-cmd
