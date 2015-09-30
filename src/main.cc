@@ -46,7 +46,10 @@ void show_help(char **argv) {
       "Usage: %s \n"
       "-h           : show this help\n"
       "-n           : commandline mode (disable GUI)\n"
-      "-s threshold : threshold (Default=%d)\n"
+      "-s threshold : threshold (default=%d)\n"
+      "-d duration  : maximum scene change duration in ms (default=no maximum)\n"
+      "-k offset    : offset after end of scene change in ms (default=%d)\n"
+      "-5           : inspect only every 5th frame\n"
       "-i file      : input file path\n"
       "-o path      : output path\n"
       "-y year      : set the year\n"
@@ -59,7 +62,7 @@ void show_help(char **argv) {
       "-m           : generate the thumbnail image\n"
       "-r           : generate the images in native resolution\n"
       "-c           : print timecode on x-axis in graph\n",
-      g_APP_VERSION, argv[0], DEFAULT_THRESHOLD);
+      g_APP_VERSION, argv[0], DEFAULT_THRESHOLD, DEFAULT_OFFSET);
 }
 
 int main(int argc, char **argv) {
@@ -78,7 +81,7 @@ int main(int argc, char **argv) {
   f.threshold = DEFAULT_THRESHOLD;
 
   for (;;) {
-    int c = getopt (argc, argv, "?hnt:y:i:o:a:x:s:fTlwvmrc");
+    int c = getopt (argc, argv, "?hnt:y:i:o:a:x:s:d:k:fTlwvmrc5");
 
     if (c < 0) {
       break;
@@ -167,6 +170,19 @@ int main(int argc, char **argv) {
       case 'o':
         f.set_opath(optarg);
         ofile_set = true;
+        break;
+
+      /* inspect every 5th frame only */
+      case '5':
+        f.set_fifth(true);
+        break;
+
+      case 'd':
+        f.set_max_scene_change_duration(atoi(optarg));
+        break;
+
+      case 'k':
+        f.set_after_scene_change_offset(atoi(optarg));
         break;
 
       /* Run without GUI */

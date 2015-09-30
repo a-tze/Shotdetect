@@ -51,6 +51,7 @@ extern "C" {
 #define DEFAULT_BDD_PORT 5432
 #define DEFAULT_THUMB_HEIGHT 85
 #define DEFAULT_THRESHOLD 75
+#define DEFAULT_OFFSET 2000
 
 #define RATIO 327
 #define MIN_INT -32768
@@ -121,6 +122,7 @@ class film {
 
   void do_stats(int frame);
   void get_yuv_colors(AVFrame &pFrame);
+  bool scene_change(int diff, int score, int timestamp);
   void CompareFrameRGB(AVFrame *pFrameRGB, AVFrame *pFrameRGBPrev);
   void CompareFrameYUV(AVFrame &pFrameYUV, AVFrame &pFrameYUVPrev);
   void CompareFrameY(AVFrame &pFrameY, AVFrame &pFrameYPrev);
@@ -190,6 +192,15 @@ class film {
   string code_lang;
   /* Processing threshold */
   int threshold;
+  /* maximum duration of scene change */
+  int max_scene_change_duration;
+  /* delay between end of scene change and resulting timecode/thumbnail */
+  int after_scene_change_offset;
+  /* remember begin and end of last scene change */
+  int last_change_begin_time;
+  int last_change_end_time;
+  int last_time;
+  bool in_change;
   /* Embed timecode */
   bool show_timecode;
   /* Alphanumeric ID */
@@ -231,6 +242,8 @@ class film {
     this->input_path = input_file;
   };
   inline void set_threshold(int threshold) { this->threshold = threshold; };
+  inline void set_max_scene_change_duration(int duration) { this->max_scene_change_duration = duration; };
+  inline void set_after_scene_change_offset(int offset) { this->after_scene_change_offset = offset; };
   inline void set_show_timecode(bool val) { this->show_timecode = val; };
   inline void set_ipath(string path) { this->input_path = path; };
   inline void set_opath(string path) { this->global_path = path; };

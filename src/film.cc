@@ -80,6 +80,39 @@ void film::create_main_dir() {
   }
 }
 
+bool film::scene_change(int diff, int score, int timestamp) {
+  bool change = (diff > this->threshold) && (score > this->threshold);
+  if (!change && !in_change) {
+    return false;
+  }
+  if (change && !in_change) {
+    in_change = true;
+    last_change_begin_time = timestamp;
+    last_change_end_time = timestamp;
+    return false;
+  }
+  if (change && in_change) {
+    last_change_end_time = timestamp;
+    if (max_scene_change_duration >= 0 && timestamp >= last_change_begin_time + max_scene_change_duration) {
+      // this is a very long scene change, produce intermediate positives
+      last_change_begin_time = timestamp;
+      last_time = timestamp;
+      return true;
+    }
+    return false;
+  }
+  if (!change && in_change) {
+    if (timestamp >= last_change_end_time + after_scene_change_offset) {
+      in_change = false;
+      last_time = timestamp;
+      return true;
+    }
+    return false;
+  }
+  // should never reach here
+  return false;
+}
+
 void film::get_yuv_colors(AVFrame &pFrameYUV) {
   int x;
   int y;
@@ -174,7 +207,7 @@ void film::CompareFrameRGB(AVFrame *pFrame, AVFrame *pFramePrev) {
   /*
    * Take care of storing frame position and images of detecte scene cut
    */
-  if ((diff > this->threshold) && (score > this->threshold)) {
+  if (scene_change(diff, score, int((frame_number * 1000) / fps))) {
     shot s;
     s.fbegin = frame_number;
     s.msbegin = int((frame_number * 1000) / fps);
@@ -300,7 +333,7 @@ void film::CompareFrameYUV(AVFrame &pFrameYUV, AVFrame &pFrameYUVPrev) {
   /*
    * Take care of storing frame position and images of detecte scene cut
    */
-  if ((diff > this->threshold) && (score > this->threshold)) {
+  if (scene_change(diff, score, int((frame_number * 1000) / fps))) {
     shot s;
     s.fbegin = frame_number;
     s.msbegin = int((frame_number * 1000) / fps);
@@ -401,7 +434,7 @@ void film::CompareFrameY(AVFrame &pFrameY, AVFrame &pFrameYPrev) {
   /*
    * Take care of storing frame position and images of detecte scene cut
    */
-  if ((diff > this->threshold) && (score > this->threshold)) {
+  if (scene_change(diff, score, int((frame_number * 1000) / fps))) {
     shot s;
     s.fbegin = frame_number;
     s.msbegin = int((frame_number * 1000) / fps);
@@ -602,16 +635,16 @@ int film::process() {
     /*
      * Allocate current and previous video frames
      */
-    pFrame = avcodec_alloc_frame();
+    pFrame = av_frame_alloc();
     // RGB:
-    pFrameRGB = avcodec_alloc_frame();      // current frame
-    pFrameRGBprev = avcodec_alloc_frame();  // previous frame
+    pFrameRGB = av_frame_alloc();      // current frame
+    pFrameRGBprev = av_frame_alloc();  // previous frame
     // YUV:
-    pFrameYUV = avcodec_alloc_frame();  // current frame
-    pFrameYUVprev = avcodec_alloc_frame();  // previous frame
+    pFrameYUV = av_frame_alloc();  // current frame
+    pFrameYUVprev = av_frame_alloc();  // previous frame
     // Y:
-    pFrameY = avcodec_alloc_frame();  // current frame
-    pFrameYprev = avcodec_alloc_frame();  // previous frame
+    pFrameY = av_frame_alloc();  // current frame
+    pFrameYprev = av_frame_alloc();  // previous frame
 
     /*
      * Allocate memory for the pixels of a picture and setup the AVPicture
@@ -852,7 +885,7 @@ void film::process_audio() {
   len = packet.size;
 
   while (len > 0) {
-    this->audio_buf = avcodec_alloc_frame();
+    this->audio_buf = av_frame_alloc();
     // (short *) av_fast_realloc (this->audio_buf, &samples_size, FFMAX
     // (packet.size, AVCODEC_MAX_AUDIO_FRAME_SIZE));
     data_size = samples_size;
@@ -925,6 +958,12 @@ film::film(DialogShotDetect *d) {
 
   display = 1;
   threshold = DEFAULT_THRESHOLD;
+  max_scene_change_duration = -1;
+  after_scene_change_offset = DEFAULT_OFFSET;
+  last_change_begin_time = 0;
+  last_change_end_time = 0;
+  last_time = -1;
+  in_change = false;
   samplearg = 1000;
   samples = 0;
   minright = MAX_INT;
@@ -941,6 +980,12 @@ film::film() {
   // Initialization of default values (non GUI)
   display = 0;
   threshold = DEFAULT_THRESHOLD;
+  max_scene_change_duration = -1;
+  after_scene_change_offset = DEFAULT_OFFSET;
+  last_change_begin_time = 0;
+  last_change_end_time = 0;
+  last_time = -1;
+  in_change = false;
   samplearg = 1000;
   samples = 0;
   minright = MAX_INT;
