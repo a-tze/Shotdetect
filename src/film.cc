@@ -725,6 +725,7 @@ int film::process() {
             CompareFrameYUV(*pFrameYUV, *pFrameYUVprev);
 //          CompareFrameY(*pFrameY, *pFrameYprev);
           } else {
+            av_free_packet(&packet);
             continue;
           }
         } else {

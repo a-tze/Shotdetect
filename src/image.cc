@@ -82,6 +82,7 @@ int image::SaveFrame(AVFrame *pFrame, int frame_number, AVPixelFormat pixfmt) {
           this->height, pFrameRGB->data, pFrameRGB->linesize);
   int ret = this->SaveFrame(pFrameRGB, frame_number);
   // free:
+  avpicture_free((AVPicture *)pFrameRGB);
   av_frame_free(&pFrameRGB);
   sws_freeContext(convert_ctx);
   return ret;
