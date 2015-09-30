@@ -132,7 +132,7 @@ int image::SaveFrame(AVFrame *pFrame, int frame_number) {
   }
 
   /* Pad numbers to constant string width: */
-  char s_id[5];
+  char s_id[16];
   char s_frame_number[9];
 
   sprintf(s_id, "%05d", id);
