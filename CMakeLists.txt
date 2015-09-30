@@ -18,7 +18,6 @@ list(APPEND SOURCES "${CMAKE_CURRENT_BINARY_DIR}/version.cc" src/version.h)
 
 # Miscellaneous compilation options:
 
-OPTION(USE_WXWIDGETS "Compile GUI app with wxWidgets, otherwise commandline app" ON)
 OPTION(USE_POSTGRESQL "Compile with PostgreSQL support" OFF)
 
 # Dependency: pkg-config (required if cross-compiling with MXE)
@@ -129,19 +128,6 @@ ELSE()
 	MESSAGE(FATAL_ERROR "Couldn't find libxslt")
 ENDIF()
 
-# Dependency: wxWidgets (optional)
-IF(USE_WXWIDGETS)
-	FIND_PACKAGE(wxWidgets)# COMPONENTS core base)
-	IF(wxWidgets_FOUND)
-		MESSAGE("Found wxWidgets: ${wxWidgets_LIBRARIES} in ${wxWidgets_INCLUDE_DIRS}")
-		INCLUDE_DIRECTORIES(${wxWidgets_INCLUDE_DIRS})
-		ADD_DEFINITIONS(-DWXWIDGETS)
-		INCLUDE("${wxWidgets_USE_FILE}")
-	ELSE()
-		MESSAGE(FATAL_ERROR "Couldn't find wxWidgets. Set USE_WXWIDGETS to OFF or install wxWidgets.")
-	ENDIF()
-ENDIF()
-
 # Dependency: PostgreSQL (optional)
 IF(USE_POSTGRESQL)
 	FIND_PACKAGE(PostgreSQL)
@@ -168,9 +154,6 @@ IF(USE_POSTGRESQL)
 ENDIF()
 ADD_LIBRARY(${TARGET_NAME} ${${TARGET_NAME}_LIBRARY_SRCS} ${${TARGET_NAME}_LIBRARY_HDRS})
 TARGET_LINK_LIBRARIES(${TARGET_NAME} ${FFMPEG_LIBRARIES} ${LIBXML2_LIBRARIES} ${LIBXSLT_LIBRARIES} ${GD_LIBRARIES})
-IF(USE_WXWIDGETS AND wxWidgets_FOUND)
-	TARGET_LINK_LIBRARIES(${TARGET_NAME} ${wxWidgets_LIBRARIES})
-ENDIF()
 IF(USE_POSTGRESQL AND PostgreSQL_FOUND)
 	TARGET_LINK_LIBRARIES(${TARGET_NAME} ${PostgreSQL_LIBRARY})
 ENDIF()
@@ -183,20 +166,11 @@ ELSEIF(WIN32)
 	SET(APP_TYPE "WIN32")
 ENDIF()
 
-IF(USE_WXWIDGETS AND wxWidgets_FOUND)
-    LIST(APPEND ${TARGET_NAME}_GUI_SRCS src/main.cc src/ui/dialog_help.cc src/ui/dialog_shotdetect.cc src/ui/process_video_thread.cc)
-    LIST(APPEND ${TARGET_NAME}_GUI_HDRS src/ui/dialog_help.h src/ui/dialog_shotdetect.h src/ui/process_video_thread.h)
-    ADD_EXECUTABLE(${TARGET_NAME}-gui ${APP_TYPE} ${SOURCES} ${${TARGET_NAME}_GUI_SRCS} ${${TARGET_NAME}_GUI_HDRS})
-	TARGET_LINK_LIBRARIES(${TARGET_NAME}-gui ${TARGET_NAME})
-    # Make this target optional to install:
-    SET(TARGETS_TO_INSTALL ${TARGET_NAME}-gui)
-ELSE()
-    LIST(APPEND ${TARGET_NAME}_COMMANDLINE_SRCS src/commandline.cc)
-    ADD_EXECUTABLE(${TARGET_NAME}-cmd ${SOURCES} ${${TARGET_NAME}_COMMANDLINE_SRCS})
-	TARGET_LINK_LIBRARIES(${TARGET_NAME}-cmd ${TARGET_NAME})
-    # Make this target optional to install:
-    SET(TARGETS_TO_INSTALL ${TARGET_NAME}-cmd)
-ENDIF()
+LIST(APPEND ${TARGET_NAME}_COMMANDLINE_SRCS src/commandline.cc)
+ADD_EXECUTABLE(${TARGET_NAME}-cmd ${SOURCES} ${${TARGET_NAME}_COMMANDLINE_SRCS})
+TARGET_LINK_LIBRARIES(${TARGET_NAME}-cmd ${TARGET_NAME})
+# Make this target optional to install:
+SET(TARGETS_TO_INSTALL ${TARGET_NAME}-cmd)
 
 
 # Routines for installing shotdetect.

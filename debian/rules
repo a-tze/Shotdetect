@@ -21,14 +21,10 @@ include /usr/share/dpkg/default.mk
 %:
 	dh $@ 
 
-# debmake generated override targets
-# This is example for Cmake (See http://bugs.debian.org/641051 )
-override_dh_auto_configure:
-	dh_auto_configure -- -DUSE_WXWIDGETS=OFF
-
-#	dh_auto_configure -- -DUSE_WXWIDGETS=OFF -DCMAKE_BUILD_TYPE=Debug
-
 override_dh_install:
 
+#override_dh_auto_configure:
+#	dh_auto_configure -- -DCMAKE_BUILD_TYPE=Debug
+#
 #override_dh_strip:
 #	

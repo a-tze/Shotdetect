@@ -18,12 +18,6 @@
 #define UINT64_C(c) (c##ULL)
 #endif
 
-#ifdef WXWIDGETS
-#include <wx/msgdlg.h>
-#include <wx/thread.h>
-#include "src/ui/dialog_shotdetect.h"
-#endif
-
 #include <sys/time.h>
 #include <time.h>
 extern "C" {
@@ -42,25 +36,6 @@ void film::do_stats(int frame_number) {
   struct timezone timezone;
   gettimeofday(&time_now, &timezone);
 
-#ifdef WXWIDGETS
-  int time_elapsed = time_now.tv_sec - dialogParent->time_start.tv_sec;
-
-  if (dialogParent->get_time_elapsed() != time_elapsed) {
-    wxMutexGuiEnter();
-    dialogParent->set_time_elapsed(time_elapsed);
-    wxMutexGuiLeave();
-  }
-
-  percent = ((frame_number) / (fps * (duration.mstotal / 100000)));
-
-  if (int(percent) != int(perctmp) || !show_started) {
-    double val_global = percent / idfilm + double(progress_state_prev);
-    wxMutexGuiEnter();
-    dialogParent->set_progress_local(percent);
-    dialogParent->set_progress_global(val_global);
-    wxMutexGuiLeave();
-  }
-#endif
   show_started = 1;
 }
 
@@ -226,12 +201,7 @@ void film::CompareFrameRGB(AVFrame *pFrame, AVFrame *pFramePrev) {
 /*
  * Create images if necessary
  */
-#ifdef WXWIDGETS
-    if (this->first_img_set ||
-        (display && dialogParent->checkbox_1->GetValue()))
-#else
     if (this->first_img_set)
-#endif
     {
       image *im_begin = new image(this, width, height, s.myid, BEGIN,
                                   this->thumb_set, this->shot_set);
@@ -239,11 +209,7 @@ void film::CompareFrameRGB(AVFrame *pFrame, AVFrame *pFramePrev) {
       s.img_begin = im_begin;
     }
 
-#ifdef WXWIDGETS
-    if (this->last_img_set || (display && dialogParent->checkbox_2->GetValue()))
-#else
     if (this->last_img_set)
-#endif
     {
       image *im_end = new image(this, width, height, s.myid - 1, END,
                                 this->thumb_set, this->shot_set);
@@ -252,18 +218,6 @@ void film::CompareFrameRGB(AVFrame *pFrame, AVFrame *pFramePrev) {
     }
     shots.push_back(s);
 
-/*
- * updating display
- */
-#ifdef WXWIDGETS
-    wxString nbshots;
-    nbshots << shots.size();
-    if (display) {
-      wxMutexGuiEnter();
-      dialogParent->list_films->SetItem(0, 1, nbshots);
-      wxMutexGuiLeave();
-    }
-#endif
   }
 }
 
@@ -352,12 +306,7 @@ void film::CompareFrameYUV(AVFrame &pFrameYUV, AVFrame &pFrameYUVPrev) {
 /*
  * Create images if necessary
  */
-#ifdef WXWIDGETS
-    if (this->first_img_set ||
-        (display && dialogParent->checkbox_1->GetValue()))
-#else
     if (this->first_img_set)
-#endif
     {
       image *im_begin = new image(this, width, height, s.myid, BEGIN,
                                   this->thumb_set, this->shot_set);
@@ -365,11 +314,7 @@ void film::CompareFrameYUV(AVFrame &pFrameYUV, AVFrame &pFrameYUVPrev) {
       s.img_begin = im_begin;
     }
 
-#ifdef WXWIDGETS
-    if (this->last_img_set || (display && dialogParent->checkbox_2->GetValue()))
-#else
     if (this->last_img_set)
-#endif
     {
       image *im_end = new image(this, width, height, s.myid - 1, END,
                                 this->thumb_set, this->shot_set);
@@ -378,18 +323,6 @@ void film::CompareFrameYUV(AVFrame &pFrameYUV, AVFrame &pFrameYUVPrev) {
     }
     shots.push_back(s);
 
-/*
- * updating display
- */
-#ifdef WXWIDGETS
-    wxString nbshots;
-    nbshots << shots.size();
-    if (display) {
-      wxMutexGuiEnter();
-      dialogParent->list_films->SetItem(0, 1, nbshots);
-      wxMutexGuiLeave();
-    }
-#endif
   }
 }
 
@@ -453,12 +386,7 @@ void film::CompareFrameY(AVFrame &pFrameY, AVFrame &pFrameYPrev) {
 /*
  * Create images if necessary
  */
-#ifdef WXWIDGETS
-    if (this->first_img_set ||
-        (display && dialogParent->checkbox_1->GetValue()))
-#else
     if (this->first_img_set)
-#endif
     {
       image *im_begin = new image(this, width, height, s.myid, BEGIN,
                                   this->thumb_set, this->shot_set);
@@ -466,11 +394,7 @@ void film::CompareFrameY(AVFrame &pFrameY, AVFrame &pFrameYPrev) {
       s.img_begin = im_begin;
     }
 
-#ifdef WXWIDGETS
-    if (this->last_img_set || (display && dialogParent->checkbox_2->GetValue()))
-#else
     if (this->last_img_set)
-#endif
     {
       image *im_end = new image(this, width, height, s.myid - 1, END,
                                 this->thumb_set, this->shot_set);
@@ -479,18 +403,6 @@ void film::CompareFrameY(AVFrame &pFrameY, AVFrame &pFrameYPrev) {
     }
     shots.push_back(s);
 
-/*
- * updating display
- */
-#ifdef WXWIDGETS
-    wxString nbshots;
-    nbshots << shots.size();
-    if (display) {
-      wxMutexGuiEnter();
-      dialogParent->list_films->SetItem(0, 1, nbshots);
-      wxMutexGuiLeave();
-    }
-#endif
   }
 }
 
@@ -534,19 +446,7 @@ void film::update_metadata() {
 }
 
 void film::shotlog(string message) {
-#ifdef WXWIDGETS
-  if (display) {
-    wxString mess;
-    mess = wxString(wxString::FromAscii(message.c_str()));
-    wxMutexGuiEnter();
-    wxMessageDialog MsgDlg(dialogParent, mess);
-    MsgDlg.ShowModal();
-    wxMutexGuiLeave();
-  } else
-#endif
-  {
-    cerr << "Shot log :: " << message << endl;
-  }
+  cerr << "Shot log :: " << message << endl;
 }
 
 int film::process() {
@@ -669,18 +569,6 @@ int film::process() {
     shots.push_back(s);
   }
 
-#ifdef WXWIDGETS
-  wxString fduration;
-  fduration << duration.hours << wxT(":") << duration.mins << wxT(":")
-            << duration.secs << wxT(":") << duration.us;
-
-  if (display) {
-    wxMutexGuiEnter();
-    dialogParent->list_films->SetItem(0, 2, fduration);
-    wxMutexGuiLeave();
-  }
-#endif
-
   checknumber = (samplerate * samplearg) / 1000;
 
   /*
@@ -770,12 +658,7 @@ int film::process() {
                                      this->thumb_set, this->shot_set);
           begin_i->create_img_dir();
 
-#ifdef WXWIDGETS
-          if (this->first_img_set ||
-              (display && dialogParent->checkbox_1->GetValue()))
-#else
           if (this->first_img_set)
-#endif
           {
             begin_i->SaveFrame(pFrameRGB, frame_number);
             shots.back().img_begin = begin_i;
@@ -806,11 +689,7 @@ int film::process() {
     shots.back().fduration = pFrame->coded_picture_number - shots.back().fbegin;
     shots.back().msduration = int(((shots.back().fduration) * 1000) / fps);
     duration.mstotal = int(shots.back().msduration + shots.back().msbegin);
-#ifdef WXWIDGETS
-    if (this->last_img_set || (display && dialogParent->checkbox_2->GetValue()))
-#else
     if (this->last_img_set)
-#endif
     {
       image *end_i = new image(this, width, height, shots.back().myid, END,
                                this->thumb_set, this->shot_set);
@@ -945,36 +824,6 @@ void film::process_audio() {
     }
   }
 }
-
-#ifdef WXWIDGETS
-film::film(DialogShotDetect *d) {
-  // Initialization of values for the GUI
-  myid = idfilm;
-  idfilm++;
-  dialogParent = d;
-  progress_state_prev = dialogParent->GetGlobalProgress();
-  show_started = true;
-  percent = 0;
-
-  display = 1;
-  threshold = DEFAULT_THRESHOLD;
-  max_scene_change_duration = -1;
-  after_scene_change_offset = DEFAULT_OFFSET;
-  last_change_begin_time = 0;
-  last_change_end_time = 0;
-  last_time = -1;
-  in_change = false;
-  samplearg = 1000;
-  samples = 0;
-  minright = MAX_INT;
-  maxright = MIN_INT;
-  minleft = MAX_INT;
-  maxleft = MIN_INT;
-  ech = 0;
-  nchannel = 1;
-  audio_buf = NULL;
-}
-#endif
 
 film::film() {
   // Initialization of default values (non GUI)

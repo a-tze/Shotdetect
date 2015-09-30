@@ -30,9 +30,6 @@ extern "C" {
 #include "src/film.h"
 
 #include <gd.h>
-#ifdef WXWIDGETS
-#include <wx/wx.h>
-#endif
 
 #define BEGIN true
 #define END false
