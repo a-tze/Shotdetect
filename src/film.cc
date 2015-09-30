@@ -764,7 +764,7 @@ int film::process() {
     /*
      * Free the packet that was allocated by av_read_frame
      */
-    if (packet.data != NULL) av_free_packet(&packet);
+    av_free_packet(&packet);
   }
 
   if (videoStream != -1) {
