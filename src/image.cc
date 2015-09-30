@@ -75,12 +75,16 @@ int image::SaveFrame(AVFrame *pFrame, int frame_number, AVPixelFormat pixfmt) {
     exit(1);
   }
   // allocate dest data structure
-  AVFrame *pFrameRGB = avcodec_alloc_frame();
+  AVFrame *pFrameRGB = av_frame_alloc();
   avpicture_alloc((AVPicture *)pFrameRGB, PIX_FMT_RGB24, this->width, this->height);
   // convert
   sws_scale(convert_ctx, pFrame->data, pFrame->linesize, 0,
           this->height, pFrameRGB->data, pFrameRGB->linesize);
-  return this->SaveFrame(pFrameRGB, frame_number);
+  int ret = this->SaveFrame(pFrameRGB, frame_number);
+  // free:
+  av_frame_free(&pFrameRGB);
+  sws_freeContext(convert_ctx);
+  return ret;
 }
 
 int image::SaveFrame(AVFrame *pFrame, int frame_number) {
