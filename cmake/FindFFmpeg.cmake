@@ -40,6 +40,7 @@ MACRO(FFMPEG_FIND varname shortname headername)
         /opt/csw/include # Blastwave
         /opt/include
         /usr/freeware/include
+	/usr/include/x86_64-linux-gnu
         PATH_SUFFIXES ffmpeg
         DOC "Location of FFMPEG Headers"
     )
