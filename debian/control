@@ -4,12 +4,12 @@ Priority: optional
 Maintainer: atze <atze@fem.tu-ilmenau.de>
 Build-Depends: debhelper (>= 9), cmake, clang, dpkg-dev,
  libxml2-dev, libavutil-dev | libavutil-ffmpeg-dev, libavformat-dev | libavformat-ffmpeg-dev, libswscale-dev | libswscale-ffmpeg-dev,
- libxslt1-dev, libgd-dev, libavcodec-dev | libavcodec-ffmpeg-dev, libavdevice-dev | libavdevice-ffmpeg-dev
+ libxslt1-dev, libgd-dev, libavcodec-dev | libavcodec-ffmpeg-dev
 Standards-Version: 3.9.5
 
 Package: shotdetect-cmd
 Architecture: any
-Depends: libc6, libgcc1, libstdc++6, libjpeg8, zlib1g, libpng12-0, libgd3 | libgd2, libxslt1.1, libxml2, ${shlibs:Depends}, ${misc:Depends}
+Depends: libc6, libgcc1, libstdc++6, libgd3 | libgd2, libxslt1.1, libxml2, ${shlibs:Depends}, ${misc:Depends}
 Description: detects scene changes in video files
  shotdetect detects scene changes in video files
 
