@@ -563,7 +563,7 @@ int film::process() {
     /*
      * Mise en place du premier plan
      */
-    s.fbegin = 0;
+    s.fbegin = 1;
     s.msbegin = 0;
     s.myid = 0;
     shots.push_back(s);
