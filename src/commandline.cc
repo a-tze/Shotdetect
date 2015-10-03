@@ -48,6 +48,8 @@ void show_help(char **argv) {
       "\nShotdetect version \"%s\", Copyright (c) 2007-2013 Johan Mathe\n\n"
       "Usage: %s \n"
       "-h           : show this help\n"
+      "-p frames    : Skip number of frames on beginning of file\n"
+      "-e frames    : Stop at this absolute frame number\n"
       "-s threshold : threshold (Default=%d)\n"
       "-d duration  : maximum scene change duration in ms (default=no maximum)\n"
       "-k offset    : offset after end of scene change in ms (default=%d)\n"
@@ -88,7 +90,7 @@ int main(int argc, char **argv) {
   f.set_draw_yuv_graph(false);  // YUV graph is still disabled, until it works.
 
   for (;;) {
-    int c = getopt(argc, argv, "?ht:y:i:o:a:x:s:d:k:flwvmrc5");
+    int c = getopt(argc, argv, "?ht:y:i:o:a:x:s:d:k:p:e:flwvmrc5");
 
     if (c < 0) {
       break;
@@ -190,6 +192,14 @@ int main(int argc, char **argv) {
 
       case 'k':
         f.set_after_scene_change_offset(atoi(optarg));
+        break;
+
+      case 'p':
+        f.set_start_frame(atoi(optarg));
+        break;
+
+      case 'e':
+        f.set_end_frame(atoi(optarg));
         break;
 
       default:

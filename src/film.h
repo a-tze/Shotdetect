@@ -198,6 +198,8 @@ class film {
   int last_change_end_time;
   int last_time;
   bool in_change;
+  int start_frame;
+  int end_frame;
   /* Embed timecode */
   bool show_timecode;
   /* Alphanumeric ID */
@@ -236,6 +238,8 @@ class film {
     this->input_path = input_file;
   };
   inline void set_threshold(int threshold) { this->threshold = threshold; };
+  inline void set_start_frame(int frame) { this->start_frame = frame; };
+  inline void set_end_frame(int frame) { this->end_frame = frame; };
   inline void set_max_scene_change_duration(int duration) { this->max_scene_change_duration = duration; };
   inline void set_after_scene_change_offset(int offset) { this->after_scene_change_offset = offset; };
   inline void set_show_timecode(bool val) { this->show_timecode = val; };

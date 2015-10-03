@@ -581,6 +581,20 @@ int film::process() {
       if (frameFinished) {
         frame_number = pCodecCtx->frame_number;  // Current frame number
 
+        // apply skip-frames parameter
+        frame_number -= start_frame;
+
+        if (frame_number < 1) {
+          /* skip frame parameter is set and we didn't reach that frame yet */
+          av_free_packet(&packet);
+          continue;
+        }
+
+        if (end_frame >= 0 && (frame_number - 1) >= end_frame) {
+          av_free_packet(&packet);
+          break;
+        }
+
         // Convert the image into YUV444
         if (!img_ctx) {
           img_ctx =
@@ -835,6 +849,8 @@ film::film() {
   last_change_end_time = 0;
   last_time = -1;
   in_change = false;
+  start_frame = 0;
+  end_frame = -1;
   samplearg = 1000;
   samples = 0;
   minright = MAX_INT;

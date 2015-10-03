@@ -1,8 +1,9 @@
-shotdetect (2015.10.03.01) unstable; urgency=low
+shotdetect (2015.10.03.02) unstable; urgency=low
 
   * fix XML result: first frame is "1", not "0"
+  * add options for skipping frames and limit duration
 
- -- Matthias Hunstock <atze@fem.tu-ilmenau.de>  Sat, 03 Oct 2015 21:01:45 +0200
+ -- Matthias Hunstock <atze@fem.tu-ilmenau.de>  Sat, 03 Oct 2015 23:07:45 +0200
 
 shotdetect (2015.10.01.01) unstable; urgency=low
 
