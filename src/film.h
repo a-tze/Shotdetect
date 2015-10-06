@@ -200,6 +200,7 @@ class film {
   bool in_change;
   int start_frame;
   int end_frame;
+  int frame_number;
   /* Embed timecode */
   bool show_timecode;
   /* Alphanumeric ID */

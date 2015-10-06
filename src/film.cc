@@ -123,7 +123,7 @@ void film::CompareFrameRGB(AVFrame *pFrame, AVFrame *pFramePrev) {
   int x;
   int y;
   int diff;
-  int frame_number = pCodecCtx->frame_number;
+//  int frame_number = pCodecCtx->frame_number;
   int c1, c2, c3;
   int c1tot, c2tot, c3tot;
   c1tot = 0;
@@ -231,7 +231,7 @@ void film::CompareFrameYUV(AVFrame &pFrameYUV, AVFrame &pFrameYUVPrev) {
   int x;
   int y;
   int diff;
-  int frame_number = pCodecCtx->frame_number;
+//  int frame_number = pCodecCtx->frame_number;
   int c1, c2, c3;
   int c1tot, c2tot, c3tot;
   c1tot = 0;
@@ -330,7 +330,7 @@ void film::CompareFrameY(AVFrame &pFrameY, AVFrame &pFrameYPrev) {
   int x;
   int y;
   int diff;
-  int frame_number = pCodecCtx->frame_number;
+//  int frame_number = pCodecCtx->frame_number;
   int c1;
   int c1tot = 0;
   c1tot = 0;
@@ -456,7 +456,7 @@ int film::process() {
   static struct SwsContext *img_convert_ctx = NULL;
   static struct SwsContext *img_ctx = NULL;
   static struct SwsContext *img_gray_ctx = NULL;
-  int frame_number;
+//  int frame_number;
 
   create_main_dir();
 
@@ -686,7 +686,7 @@ int film::process() {
         av_picture_copy((AVPicture *)pFrameRGBprev, (AVPicture *)pFrameRGB,
                         PIX_FMT_RGB24, width, height);
 
-        if (display) do_stats(pCodecCtx->frame_number);
+        if (display) do_stats(frame_number);
       }
     }
     if (audio_set && (packet.stream_index == audioStream)) {
