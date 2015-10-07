@@ -1,3 +1,9 @@
+shotdetect (2015.10.07.01) unstable; urgency=high
+
+  * improve thumbnail quality
+
+ -- Matthias Hunstock <atze@fem.tu-ilmenau.de>  Wed, 07 Oct 2015 09:47:23 +0200
+
 shotdetect (2015.10.06.01) unstable; urgency=high
 
   * BUGFIX: frame skipping did not work correctly

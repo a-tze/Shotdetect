@@ -164,7 +164,7 @@ int image::SaveFrame(AVFrame *pFrame, int frame_number) {
       perror("shotdetect ");
       exit(EXIT_FAILURE);
     }
-    gdImageCopyResized(miniim, im, 0, 0, 0, 0, width_s, height_s, width,
+    gdImageCopyResampled(miniim, im, 0, 0, 0, 0, width_s, height_s, width,
                        height);
     gdImageJpeg(miniim, minijpgout, 80);
     fclose(minijpgout);
