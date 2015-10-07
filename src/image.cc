@@ -190,7 +190,7 @@ int image::SaveFrame(AVFrame *pFrame, int frame_number) {
       perror("shotdetect ");
       exit(EXIT_FAILURE);
     }
-    gdImageJpeg(im, jpgout, 90);
+    gdImageJpeg(im, jpgout, 85);
     fclose(jpgout);
   }
 
