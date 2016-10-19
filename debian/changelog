@@ -1,3 +1,9 @@
+shotdetect (2016.10.19.01) unstable; urgency=medium
+
+  * fix build on Debian Jessie
+
+ -- Matthias Hunstock <atze@fem.tu-ilmenau.de>  Wed, 19 Oct 2016 13:42:32 +0200
+
 shotdetect (2015.10.07.01) unstable; urgency=high
 
   * improve thumbnail quality
