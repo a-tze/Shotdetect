@@ -4,12 +4,12 @@
  * the repository revision information (e.g. git SHA1).
  */
 
-#include "../src/version.h"
+#include "src/version.h"
 
 #define GIT_SHA1 "@GIT_SHA1@"
 #define GIT_SHA1_SHORT "@GIT_SHA1_SHORT@"
 
 const char g_GIT_SHA1[] = GIT_SHA1;
 const char g_GIT_SHA1_SHORT[] = GIT_SHA1_SHORT;
-const char g_APP_VERSION[] = "2.0.0-git@GIT_SHA1_SHORT@";
+const char g_APP_VERSION[] = "2.0.1-git@GIT_SHA1_SHORT@";
 
