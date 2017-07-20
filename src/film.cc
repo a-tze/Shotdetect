@@ -21,6 +21,7 @@
 #include <sys/time.h>
 #include <time.h>
 extern "C" {
+#include <libavutil/imgutils.h>
 #include <libswscale/swscale.h>
 }
 #include "src/film.h"
@@ -551,14 +552,14 @@ int film::process() {
      * fields for it
      */
     // RGB:
-    avpicture_alloc((AVPicture *)pFrameRGB, AV_PIX_FMT_RGB24, width, height);
-    avpicture_alloc((AVPicture *)pFrameRGBprev, AV_PIX_FMT_RGB24, width, height);
+    av_image_alloc(((AVPicture *)pFrameRGB)->data, ((AVPicture *)pFrameRGB)->linesize, width, height, AV_PIX_FMT_RGB24, 4);
+    av_image_alloc(((AVPicture *)pFrameRGBprev)->data, ((AVPicture *)pFrameRGBprev)->linesize, width, height, AV_PIX_FMT_RGB24, 4);
     // YUV:
-    avpicture_alloc((AVPicture *)pFrameYUV, AV_PIX_FMT_YUV444P, width, height);
-    avpicture_alloc((AVPicture *)pFrameYUVprev, AV_PIX_FMT_YUV444P, width, height);
+    av_image_alloc(((AVPicture *)pFrameYUV)->data, ((AVPicture *)pFrameYUV)->linesize, width, height, AV_PIX_FMT_YUV444P, 4);
+    av_image_alloc(((AVPicture *)pFrameYUVprev)->data, ((AVPicture *)pFrameYUVprev)->linesize, width, height, AV_PIX_FMT_YUV444P, 4);
     // Y:
-    avpicture_alloc((AVPicture *)pFrameY, AV_PIX_FMT_GRAY8, width, height);
-    avpicture_alloc((AVPicture *)pFrameYprev, AV_PIX_FMT_GRAY8, width, height);
+    av_image_alloc(((AVPicture *)pFrameY)->data, ((AVPicture *)pFrameY)->linesize, width, height, AV_PIX_FMT_GRAY8, 4);
+    av_image_alloc(((AVPicture *)pFrameYprev)->data, ((AVPicture *)pFrameYprev)->linesize, width, height, AV_PIX_FMT_GRAY8, 4);
 
     /*
      * Mise en place du premier plan
