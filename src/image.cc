@@ -19,7 +19,7 @@
 #include <sstream>
 #include <stdlib.h>
 extern "C" {
-#include "libavutil/imgutils.h"
+#include <libavutil/imgutils.h>
 #include <libswscale/swscale.h>
 }
 
