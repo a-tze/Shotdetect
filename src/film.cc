@@ -205,7 +205,7 @@ void film::CompareFrameRGB(AVFrame *pFrame, AVFrame *pFramePrev) {
     {
       image *im_begin = new image(this, width, height, s.myid, BEGIN,
                                   this->thumb_set, this->shot_set);
-      im_begin->SaveFrame(pFrame, frame_number, PIX_FMT_RGB24);
+      im_begin->SaveFrame(pFrame, frame_number, AV_PIX_FMT_RGB24);
       s.img_begin = im_begin;
     }
 
@@ -213,7 +213,7 @@ void film::CompareFrameRGB(AVFrame *pFrame, AVFrame *pFramePrev) {
     {
       image *im_end = new image(this, width, height, s.myid - 1, END,
                                 this->thumb_set, this->shot_set);
-      im_end->SaveFrame(pFramePrev, frame_number, PIX_FMT_RGB24);
+      im_end->SaveFrame(pFramePrev, frame_number, AV_PIX_FMT_RGB24);
       shots.back().img_end = im_end;
     }
     shots.push_back(s);
@@ -310,7 +310,7 @@ void film::CompareFrameYUV(AVFrame &pFrameYUV, AVFrame &pFrameYUVPrev) {
     {
       image *im_begin = new image(this, width, height, s.myid, BEGIN,
                                   this->thumb_set, this->shot_set);
-      im_begin->SaveFrame(&pFrameYUV, frame_number, PIX_FMT_YUV444P);
+      im_begin->SaveFrame(&pFrameYUV, frame_number, AV_PIX_FMT_YUV444P);
       s.img_begin = im_begin;
     }
 
@@ -318,7 +318,7 @@ void film::CompareFrameYUV(AVFrame &pFrameYUV, AVFrame &pFrameYUVPrev) {
     {
       image *im_end = new image(this, width, height, s.myid - 1, END,
                                 this->thumb_set, this->shot_set);
-      im_end->SaveFrame(&pFrameYUVPrev, frame_number, PIX_FMT_YUV444P);
+      im_end->SaveFrame(&pFrameYUVPrev, frame_number, AV_PIX_FMT_YUV444P);
       shots.back().img_end = im_end;
     }
     shots.push_back(s);
@@ -390,7 +390,7 @@ void film::CompareFrameY(AVFrame &pFrameY, AVFrame &pFrameYPrev) {
     {
       image *im_begin = new image(this, width, height, s.myid, BEGIN,
                                   this->thumb_set, this->shot_set);
-      im_begin->SaveFrame(&pFrameY, frame_number, PIX_FMT_GRAY8);
+      im_begin->SaveFrame(&pFrameY, frame_number, AV_PIX_FMT_GRAY8);
       s.img_begin = im_begin;
     }
 
@@ -398,7 +398,7 @@ void film::CompareFrameY(AVFrame &pFrameY, AVFrame &pFrameYPrev) {
     {
       image *im_end = new image(this, width, height, s.myid - 1, END,
                                 this->thumb_set, this->shot_set);
-      im_end->SaveFrame(&pFrameYPrev, frame_number, PIX_FMT_GRAY8);
+      im_end->SaveFrame(&pFrameYPrev, frame_number, AV_PIX_FMT_GRAY8);
       shots.back().img_end = im_end;
     }
     shots.push_back(s);
@@ -551,14 +551,14 @@ int film::process() {
      * fields for it
      */
     // RGB:
-    avpicture_alloc((AVPicture *)pFrameRGB, PIX_FMT_RGB24, width, height);
-    avpicture_alloc((AVPicture *)pFrameRGBprev, PIX_FMT_RGB24, width, height);
+    avpicture_alloc((AVPicture *)pFrameRGB, AV_PIX_FMT_RGB24, width, height);
+    avpicture_alloc((AVPicture *)pFrameRGBprev, AV_PIX_FMT_RGB24, width, height);
     // YUV:
-    avpicture_alloc((AVPicture *)pFrameYUV, PIX_FMT_YUV444P, width, height);
-    avpicture_alloc((AVPicture *)pFrameYUVprev, PIX_FMT_YUV444P, width, height);
+    avpicture_alloc((AVPicture *)pFrameYUV, AV_PIX_FMT_YUV444P, width, height);
+    avpicture_alloc((AVPicture *)pFrameYUVprev, AV_PIX_FMT_YUV444P, width, height);
     // Y:
-    avpicture_alloc((AVPicture *)pFrameY, PIX_FMT_GRAY8, width, height);
-    avpicture_alloc((AVPicture *)pFrameYprev, PIX_FMT_GRAY8, width, height);
+    avpicture_alloc((AVPicture *)pFrameY, AV_PIX_FMT_GRAY8, width, height);
+    avpicture_alloc((AVPicture *)pFrameYprev, AV_PIX_FMT_GRAY8, width, height);
 
     /*
      * Mise en place du premier plan
@@ -599,7 +599,7 @@ int film::process() {
         if (!img_ctx) {
           img_ctx =
               sws_getContext(width, height, pCodecCtx->pix_fmt, width, height,
-                             PIX_FMT_YUV444P, SWS_BICUBIC, NULL, NULL, NULL);
+                             AV_PIX_FMT_YUV444P, SWS_BICUBIC, NULL, NULL, NULL);
           if (!img_ctx) {
             fprintf(stderr,
                     "Cannot initialize the converted YUV image context!\n");
@@ -610,7 +610,7 @@ int film::process() {
         if (!img_gray_ctx) {
           img_gray_ctx =
               sws_getContext(width, height, pCodecCtx->pix_fmt, width, height,
-                             PIX_FMT_GRAY8, SWS_BICUBIC, NULL, NULL, NULL);
+                             AV_PIX_FMT_GRAY8, SWS_BICUBIC, NULL, NULL, NULL);
           if (!img_gray_ctx) {
             fprintf(stderr,
                     "Cannot initialize the converted Y image context!\n");
@@ -622,7 +622,7 @@ int film::process() {
         if (!img_convert_ctx) {
           img_convert_ctx =
               sws_getContext(width, height, pCodecCtx->pix_fmt, width, height,
-                             PIX_FMT_RGB24, SWS_BICUBIC, NULL, NULL, NULL);
+                             AV_PIX_FMT_RGB24, SWS_BICUBIC, NULL, NULL, NULL);
           if (!img_convert_ctx) {
             fprintf(stderr,
                     "Cannot initialize the converted RGB image context!\n");
@@ -680,11 +680,11 @@ int film::process() {
         }
         /* Copy current frame as "previous" for next round */
         av_picture_copy((AVPicture *)pFrameYUVprev, (AVPicture *)pFrameYUV,
-                        PIX_FMT_YUV444P, width, height);
+                        AV_PIX_FMT_YUV444P, width, height);
         av_picture_copy((AVPicture *)pFrameYprev, (AVPicture *)pFrameY,
-                        PIX_FMT_GRAY8, width, height);
+                        AV_PIX_FMT_GRAY8, width, height);
         av_picture_copy((AVPicture *)pFrameRGBprev, (AVPicture *)pFrameRGB,
-                        PIX_FMT_RGB24, width, height);
+                        AV_PIX_FMT_RGB24, width, height);
 
         if (display) do_stats(frame_number);
       }
