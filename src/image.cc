@@ -66,17 +66,17 @@ int image::create_img_dir() {
 
 int image::SaveFrame(AVFrame *pFrame, int frame_number, AVPixelFormat pixfmt) {
   // no conversion needed:
-  if (pixfmt == PIX_FMT_RGB24) return this->SaveFrame(pFrame, frame_number);
+  if (pixfmt == AV_PIX_FMT_RGB24) return this->SaveFrame(pFrame, frame_number);
   // allocate scaling context for colorspace conversion
   struct SwsContext *convert_ctx = sws_getContext(this->width, this->height, pixfmt,
-          this->width, this->height, PIX_FMT_RGB24, SWS_BICUBIC, NULL, NULL, NULL);
+          this->width, this->height, AV_PIX_FMT_RGB24, SWS_BICUBIC, NULL, NULL, NULL);
   if (!convert_ctx) {
     fprintf(stderr, "SaveFrame: Cannot initialize the converted RGB image context!\n");
     exit(1);
   }
   // allocate dest data structure
   AVFrame *pFrameRGB = av_frame_alloc();
-  avpicture_alloc((AVPicture *)pFrameRGB, PIX_FMT_RGB24, this->width, this->height);
+  avpicture_alloc((AVPicture *)pFrameRGB, AV_PIX_FMT_RGB24, this->width, this->height);
   // convert
   sws_scale(convert_ctx, pFrame->data, pFrame->linesize, 0,
           this->height, pFrameRGB->data, pFrameRGB->linesize);
