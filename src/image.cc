@@ -19,6 +19,7 @@
 #include <sstream>
 #include <stdlib.h>
 extern "C" {
+#include "libavutil/imgutils.h"
 #include <libswscale/swscale.h>
 }
 
@@ -76,7 +77,7 @@ int image::SaveFrame(AVFrame *pFrame, int frame_number, AVPixelFormat pixfmt) {
   }
   // allocate dest data structure
   AVFrame *pFrameRGB = av_frame_alloc();
-  avpicture_alloc((AVPicture *)pFrameRGB, AV_PIX_FMT_RGB24, this->width, this->height);
+  av_image_alloc(((AVPicture *)pFrameRGB)->data,((AVPicture *)pFrameRGB)->linesize, this->width, this->height, AV_PIX_FMT_RGB24, 4);
   // convert
   sws_scale(convert_ctx, pFrame->data, pFrame->linesize, 0,
           this->height, pFrameRGB->data, pFrameRGB->linesize);
