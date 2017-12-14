@@ -281,7 +281,7 @@ void graph::draw_datas() {
   /*
    * Loop for creation of data axes in the graph images
    */
-  for (int i = 1; i < data.size() - 1; i++) {
+  for (int i = 1; i < (int)data.size() - 1; i++) {
     gdImageLine(im_motion_qty, i - 1 + xoffset,
                 (-data[i - 1].global) + xaxis_offset, i + xoffset,
                 (-data[i].global) + xaxis_offset, graph_colors[IM_CANVAS].line);

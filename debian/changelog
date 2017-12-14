@@ -1,3 +1,9 @@
+shotdetect (2017.12.14.01) unstable; urgency=medium
+
+  * fix segfault on very short or corrupt input files
+
+ -- Matthias Hunstock <atze@fem.tu-ilmenau.de>  Thu, 14 Dec 2017 16:18:47 +0100
+
 shotdetect (2016.10.19.01) unstable; urgency=medium
 
   * fix build on Debian Jessie
